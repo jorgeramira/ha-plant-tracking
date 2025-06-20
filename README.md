@@ -71,14 +71,14 @@ To detect this, I use a **SQL sensor** that queries Home Assistant’s internal 
 
 ### What the SQL sensor does:
 
-1. **Gets the historical state data** for your plant’s moisture sensor.
+1. **Gets the historical state data** for the plant’s moisture sensor.
 2. **Compares each value** with the one before it.
-3. **Finds the most recent jump** (greater than 10%).
+3. **Finds the most recent jump** (greater than 10%, this works fine for my use case).
 4. **Returns how many days ago** that happened.
 
 This lets me estimate the last watering — no manual logging needed.
 
-Here’s an example SQL sensor for a plant named `maia`:
+Here’s an example SQL sensor for a plant named "`maia"`:
 
 ```sql
 SELECT days_elapsed
@@ -105,6 +105,10 @@ FROM (
 
 Each plant gets its own version of this query.\
 These sensors return a **float value**, like `2.33`, which means 2 days and 8 hours ago.
+
+<Holocron.Callout type="note">
+    The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, but instead of returning the datetime of that event, I will instead return a number which represents the number of days that have passed. I will then calculate the actual date in the dashboard. They are working on a fix for this.
+</Holocron.Callout>
 
 ---
 
