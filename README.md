@@ -1,12 +1,6 @@
-# Excellent points. You're absolutely right — the README should flow from **what the project is doing** to **how it’s done**, and then into **specific code examples with explanations**, instead of jumping right into code blocks.
-
-Also, your tone should reflect that this is a **knowledge-sharing repo**, not something you're formally maintaining or offering support for — but you're open to feedback and happy to learn from others.
-
-Here’s a **revised structure and tone** for your README with your notes fully incorporated:
+## 🌿 Smart Indoor Plant Dashboard with Home Assistant
 
 ---
-
-## 🌿 Smart Indoor Plant Dashboard with Home Assistant
 
 A few years ago, I had two beautiful Calatheas. I didn’t know then that they were the divas of the plant world — dramatic, demanding, and quick to decline if you get things wrong. Without any feedback from them (besides looking a bit sad), they eventually died. 😔
 
@@ -41,16 +35,16 @@ The result is a dashboard that’s **data-rich but practical** — you stay in c
 
 ## 🔧 Tools & Integrations Used
 
-| Component                                                                  | What it's used for                                                        |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Xiaomi Miflora**                                                         | Soil moisture and nutrient (conductivity) readings                        |
-| **ESP32 + [OpenMQTTGateway](https://docs.openmqttgateway.com/)**           | BLE proxy to connect Miflora sensors to Home Assistant                    |
-| [**Plant Monitor**](https://github.com/Olen/homeassistant-plant)           | Core plant-tracking logic, threshold support, Open Plant Book integration |
-| [**Decluttering-card**](https://github.com/custom-cards/decluttering-card) | For reusable dashboard card templates                                     |
-| [**Card-mod**](https://github.com/thomasloven/lovelace-card-mod)           | For advanced visual styling of dashboard cards                            |
-| [**SQL Integration**](https://www.home-assistant.io/integrations/sql/)     | To detect watering events based on moisture spikes                        |
-| **Helper Entities**                                                        | For storing thresholds and last fertilization times                       |
-| [**Flower Card**](https://github.com/Olen/homeassistant-plant#flower-card) | To display plant bars (moisture, conductivity)                            |
+| Component                                                                                                           | What it's used for                                                        |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [**Xiaomi Miflora**](https://smarthomescene.com/reviews/xiaomi-miflora-plant-sensor-tuya-version-hhccjcy10-review/) | Soil moisture and nutrient (conductivity) readings                        |
+| **ESP32 + [OpenMQTTGateway](https://docs.openmqttgateway.com/)**                                                    | BLE proxy to connect Miflora sensors to Home Assistant                    |
+| [**Plant Monitor**](https://github.com/Olen/homeassistant-plant)                                                    | Core plant-tracking logic, threshold support, Open Plant Book integration |
+| [**Decluttering-card**](https://github.com/custom-cards/decluttering-card)                                          | For reusable dashboard card templates                                     |
+| [**Card-mod**](https://github.com/thomasloven/lovelace-card-mod)                                                    | For advanced visual styling of dashboard cards                            |
+| [**SQL Integration**](https://www.home-assistant.io/integrations/sql/)                                              | To detect watering events based on moisture spikes                        |
+| **Helper Entities**                                                                                                 | For storing thresholds and last fertilization times                       |
+| [**Flower Card**](https://github.com/Olen/homeassistant-plant#flower-card)                                          | To display plant bars (moisture, conductivity)                            |
 
 ---
 
