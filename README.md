@@ -10,7 +10,7 @@ I'm a Data Analytics consultant by trade, and I believe: **🧠 You can’t care
 
 So I built a dashboard that tracks over 30 plants using Xiaomi Miflora sensors, helper entities, SQL sensors, and a whole bunch of templating logic. It’s not about automating care — I still water and fertilize my plants manually — but this system keeps me informed, reminds me when to check them, and has dramatically improved how I care for them.
 
-## 🗺️ What This Project Does
+## 🗺️ What this project does
 
 This project helps you track plant care in a smart, data-driven way.\
 It doesn’t automate the watering or fertilizing — instead, it gives you helpful, dynamic insight into each plant’s status through:
@@ -41,7 +41,7 @@ The result is a dashboard that’s **data-rich but practical** — you stay in c
 | [**Mushroom**](https://github.com/piitaya/lovelace-mushroom)                                                        | To display the chips under each flower card                               |
 | **Helper Entities (number, datetime)**                                                                              | For storing thresholds and last fertilization times                       |
 
-## 🪴 How Plant Status is Tracked
+## 🪴 How Plant status is tracked
 
 Each plant has:
 
@@ -53,7 +53,7 @@ Each plant has:
 
 Now each component in more detail:
 
-## 💧 Detecting Watering Automatically
+## 💧 Detecting watering automatically
 
 We can infer when the plant was watered if the **soil moisture suddenly rises**, as it likely means watering just happened.
 
@@ -98,7 +98,7 @@ These sensors return a **float value**, like `2.33`, which means 2 days and 8 ho
 
 > The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
 
-## 🧪 Tracking Fertilization Manually
+## 🧪 Tracking fertilization manually
 
 I decided to track fertilization manually just to keep it simple. I really just want to know the last time I fertilized each plant, not a full history of fertilization. I do this with:
 
@@ -110,7 +110,7 @@ I decided to track fertilization manually just to keep it simple. I really just 
 
 These values are used in the dashboard and in daily alerts.
 
-## 🌳 Grouping Plants by Botanical Family
+## 🌳 Grouping plants by botanical family
 
 Each plant is assigned a **botanical family** (e.g. `Marantaceae`, `Strelitziaceae`).
 
@@ -128,7 +128,7 @@ This lets me:
 - Apply consistent thresholds to all plants in the same family
 - Adjust parameters based on care needs (e.g. Calatheas vs. Dracaenas)
 
-## 🧱 Reusable Dashboard Card
+## 🧱 Reusable dashboard card
 
 I use [decluttering-card](https://github.com/custom-cards/decluttering-card) to define a reusable plant card template.
 
@@ -149,7 +149,7 @@ You can find the full code [here](./lovelace/plant_card_compact.yaml), and I’v
 
 ![](https://holocron.so/uploads/fce3d6a3-1000000514.jpg.jpeg)
 
-## 📢 Dashboard Summary Alerts
+## 📢 Dashboard summary alerts
 
 The dashboard also includes a **summary section** showing alerts across all plants:
 
@@ -163,7 +163,7 @@ Code is in [lovelace/summary_cards.yaml](./lovelace/summary_cards.yaml)
 
 ![](https://holocron.so/uploads/68bc7daa-1000000505.jpg.jpeg)
 
-## 📬 Morning Notification
+## 📬 Morning notification
 
 Every morning, I receive a **digest of care reminders**:
 
@@ -176,7 +176,7 @@ Every morning, I receive a **digest of care reminders**:
 > ⚠️ **Note:**\
 > This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
 
-## ➕ Adding a New Plant
+## ➕ Adding a new Plant
 
 1. Add plant in Plant Monitor.
 2. Set the `species_original` attribute to the plant’s family.
@@ -190,7 +190,7 @@ Every morning, I receive a **digest of care reminders**:
 Screenshots are available in the `/screenshots` folder.\
 You can also see a demo video in [my Reddit post](https://www.reddit.com/r/homeassistant/comments/I3M77Xn8W4/).
 
-## 🤝 Feedback Welcome
+## 🤝 Feedback welcome!
 
 This project is based entirely on my own research and tinkering — it’s probably not perfect, and there might be better ways to do parts of it. I’d love to hear from others using similar setups or trying something new.
 
