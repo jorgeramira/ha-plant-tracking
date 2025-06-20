@@ -1,0 +1,15 @@
+{% for s in states.sensor if s.entity_id.endswith('_conductivity') %}
+  {% set plant = s.entity_id.replace('sensor.', '').replace('_conductivity','') %}
+  {% set min = states('number.' ~ plant ~ '_min_conductivity') | float(0) %}
+  {% set value = s.state | float(9999) %}
+  {% set moisture = states('sensor.' ~ plant ~ '_soil_moisture') | float(0) %}
+  {% set fert_dt = states('input_datetime.' ~ plant ~ '_last_fertilizing') %}
+  {% set watering_days = states('sensor.' ~ plant ~ '_last_watering') | float(9999) %}
+  {% if fert_dt not in ['unknown', 'unavailable'] and watering_days < 2 %}
+    {% set fertilized = as_local(as_datetime(fert_dt)) %}
+    {% set days_since = (now() - fertilized).days %}
+    {% if days_since < 10 and value < min * 1.25 and moisture > 35 %}
+      {{ s.entity_id }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
