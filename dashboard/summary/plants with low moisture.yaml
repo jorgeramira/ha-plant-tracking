@@ -1,0 +1,9 @@
+{% for s in states.sensor
+    if s.entity_id.endswith('_soil_moisture') %}
+  {% set plant = s.entity_id.replace('sensor.', '').replace('_soil_moisture','') %}
+  {% set min = states('number.' ~ plant ~ '_min_soil_moisture') | float(0) %}
+  {% set value = s.state | float(9999) %}
+  {% if value < min + 6 %}
+    {{ s.entity_id }}
+  {% endif %}
+{% endfor %}
