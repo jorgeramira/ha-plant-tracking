@@ -45,6 +45,7 @@ The result is a dashboard that’s **data-rich but practical** — you stay in c
 | [**SQL Integration**](https://www.home-assistant.io/integrations/sql/)                                              | To detect watering events based on moisture spikes                        |
 | [**Flower Card**](https://github.com/Olen/homeassistant-plant#flower-card)                                          | To display plant bars (moisture, conductivity)                            |
 | [**Auto-entities**](https://github.com/thomasloven/lovelace-auto-entities)                                          | To help with the summary cards in the dashboard                           |
+| [**Auto-entities**](https://github.com/thomasloven/lovelace-auto-entities)                                          | To help with the summary cards in the dashboard                           |
 | **Helper Entities (number, datetime)**                                                                              | For storing thresholds and last fertilization times                       |
 
 ---
@@ -106,17 +107,17 @@ FROM (
 Each plant gets its own version of this query.\
 These sensors return a **float value**, like `2.33`, which means 2 days and 8 hours ago.
 
-<Holocron.Callout type="note">
-    The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, but instead of returning the datetime of that event, I will instead return a number which represents the number of days that have passed. I will then calculate the actual date in the dashboard. They are working on a fix for this.
-</Holocron.Callout>
+&lt;Holocron.Callout type="note"&gt;
+The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
+&lt;/Holocron.Callout&gt;
 
 ---
 
 ## 🧪 Tracking Fertilization Manually
 
-Since sensors can't detect fertilizer, I track it manually using:
+I decided to track fertilization manually just to keep it simple. I really just want to know the last time I fertilized each plant, not a full history of fertilization. I do this with:
 
-- `input_datetime.{plant}_last_fertilizing` helpers (one per plant)
+- `input_datetime.{plant_name}_last_fertilizing` helpers (one per plant)
 - A dashboard chip to:
   - View how long it’s been since fertilizing
   - Open a calendar to change the date
