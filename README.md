@@ -43,8 +43,9 @@ The result is a dashboard that’s **data-rich but practical** — you stay in c
 | [**Decluttering-card**](https://github.com/custom-cards/decluttering-card)                                          | For reusable dashboard card templates                                     |
 | [**Card-mod**](https://github.com/thomasloven/lovelace-card-mod)                                                    | For advanced visual styling of dashboard cards                            |
 | [**SQL Integration**](https://www.home-assistant.io/integrations/sql/)                                              | To detect watering events based on moisture spikes                        |
-| **Helper Entities**                                                                                                 | For storing thresholds and last fertilization times                       |
 | [**Flower Card**](https://github.com/Olen/homeassistant-plant#flower-card)                                          | To display plant bars (moisture, conductivity)                            |
+| [**Auto-entities**](https://github.com/thomasloven/lovelace-auto-entities)                                          | To help with the summary cards in the dashboard                           |
+| **Helper Entities (number, datetime)**                                                                              | For storing thresholds and last fertilization times                       |
 
 ---
 
@@ -58,16 +59,15 @@ Each plant has:
 - A **manual fertilization tracker** using a datetime helper
 - Thresholds (warning + alert) based on the plant’s botanical family
 
-Let’s look at each component in more detail:
+Now each component in more detail:
 
 ---
 
 ## 💧 Detecting Watering Automatically
 
-No sensor can truly “know” when you watered a plant — but we can infer it.\
-If the **soil moisture suddenly rises**, it likely means watering just happened.
+We can infer when the plant was watered if the **soil moisture suddenly rises**, as it likely means watering just happened.
 
-To detect this, I use a **SQL sensor** that queries Home Assistant’s internal database for a recent spike in soil moisture for each plant.
+To detect this, I use a **SQL sensor** that queries Home Assistant’s internal database for the most recent spike in soil moisture for each plant.
 
 ### What the SQL sensor does:
 
