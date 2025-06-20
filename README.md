@@ -21,9 +21,9 @@ It doesn’t automate the watering or fertilizing — instead, it gives you help
 - Manual tracking of last fertilization
 - Thresholds per plant family to flag when attention is needed
 - Color-coded, reusable dashboard cards for each plant
-- Morning notifications with summaries of any problems
+- Morning notifications with summaries of any problems (work in progress)
 
-It’s all powered by Home Assistant, with integrations and sensors tied together through SQL, Jinja, and a ton of helpers.
+It’s all powered by Home Assistant, with integrations and sensors tied together through SQL, Jinja, and a ton of helpers. The key is to keep a logic for the names of the sensors, and then we are able to dyanmically retrieve all the corresponding sensors based on their name, wherever we need them.
 
 The result is a dashboard that’s **data-rich but practical** — you stay in control while the system quietly keeps track of everything.
 
@@ -52,7 +52,7 @@ Each plant has:
 - A **manual fertilization tracker** using a datetime helper
 - Thresholds (warning + alert) based on the plant’s botanical family
 
-Now each component in more detail:
+Now to each component in more detail:
 
 ## 💧 Detecting Watering Automatically
 
