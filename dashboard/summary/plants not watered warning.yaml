@@ -1,0 +1,13 @@
+{% for s in states.sensor if s.entity_id.endswith('_last_watering') %}
+  {% set plant = s.entity_id.replace('sensor.', '').replace('_last_watering','') %}
+  {% set days = s.state | float(0) %}
+  {% set min_moisture = states('number.' ~ plant ~ '_min_soil_moisture') | float(0) %}
+  {% set moisture = states('sensor.' ~ plant ~ '_soil_moisture') | float(9999) %}
+  {% set plant_entity = states['plant.' ~ plant] %}
+  {% set family = plant_entity.attributes.species_original %}
+  {% set warning_threshold = states('input_number.' ~ family | lower ~ '_watering_warning_days') | float(9999) %}
+  
+  {% if days and days >= warning_threshold %}
+    {{ s.entity_id }}
+  {% endif %}
+{% endfor %}
