@@ -45,7 +45,7 @@ The result is a dashboard that’s **data-rich but practical** — you stay in c
 | [**SQL Integration**](https://www.home-assistant.io/integrations/sql/)                                              | To detect watering events based on moisture spikes                        |
 | [**Flower Card**](https://github.com/Olen/homeassistant-plant#flower-card)                                          | To display plant bars (moisture, conductivity)                            |
 | [**Auto-entities**](https://github.com/thomasloven/lovelace-auto-entities)                                          | To help with the summary cards in the dashboard                           |
-| [**Auto-entities**](https://github.com/thomasloven/lovelace-auto-entities)                                          | To help with the summary cards in the dashboard                           |
+| [**Mushroom**](https://github.com/piitaya/lovelace-mushroom)                                                        | To display the chips under each flower card                               |
 | **Helper Entities (number, datetime)**                                                                              | For storing thresholds and last fertilization times                       |
 
 ---
@@ -107,9 +107,9 @@ FROM (
 Each plant gets its own version of this query.\
 These sensors return a **float value**, like `2.33`, which means 2 days and 8 hours ago.
 
-&lt;Holocron.Callout type="note"&gt;
-The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
-&lt;/Holocron.Callout&gt;
+<Holocron.Callout type="note">
+    The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
+</Holocron.Callout>
 
 ---
 
@@ -143,7 +143,7 @@ Each family gets its own threshold helpers:
 This lets me:
 
 - Apply consistent thresholds to all plants in the same family
-- Adjust parameters based on care needs (e.g. Calatheas vs. Monsteras)
+- Adjust parameters based on care needs (e.g. Calatheas vs. Dracaenas)
 
 ---
 
@@ -190,8 +190,10 @@ Every morning, I receive a **digest of care reminders**:
 - Plants recently fertilized but showing poor conductivity
 - Plants that might be overdue for watering
 
-⚠️ **Note:**\
-This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
+<Holocron.Callout type="note">
+    ⚠️ **Note:**\
+    This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
+</Holocron.Callout>
 
 ---
 
