@@ -1,6 +1,4 @@
-## 🌿 Smart Indoor Plant Dashboard with Home Assistant🌿 Smart Indoor Plant Dashboard with Home Assistant
-
----
+## 🌿 Smart Indoor Plant Dashboard with Home Assistant
 
 A few years ago, I had two beautiful Calatheas. I didn’t know then that they were the divas of the plant world — dramatic, demanding, and quick to decline if you get things wrong. Without any feedback from them (besides looking a bit sad), they eventually died. 😔
 
@@ -8,12 +6,9 @@ Fast forward to six months ago: I moved into a new apartment, started smartifyin
 
 This time, though, I was ready.
 
-I'm a Data Analytics consultant by trade, and I believe:\
-**🧠 You can’t care for what you don’t understand — and data makes all the difference.**
+I'm a Data Analytics consultant by trade, and I believe: **🧠 You can’t care for what you don’t understand — and data makes all the difference.**
 
 So I built a dashboard that tracks over 30 plants using Xiaomi Miflora sensors, helper entities, SQL sensors, and a whole bunch of templating logic. It’s not about automating care — I still water and fertilize my plants manually — but this system keeps me informed, reminds me when to check them, and has dramatically improved how I care for them.
-
----
 
 ## 🗺️ What This Project Does
 
@@ -31,8 +26,6 @@ It’s all powered by Home Assistant, with integrations and sensors tied togethe
 
 The result is a dashboard that’s **data-rich but practical** — you stay in control while the system quietly keeps track of everything.
 
----
-
 ## 🔧 Tools & Integrations Used
 
 | Component                                                                                                           | What it's used for                                                        |
@@ -48,8 +41,6 @@ The result is a dashboard that’s **data-rich but practical** — you stay in c
 | [**Mushroom**](https://github.com/piitaya/lovelace-mushroom)                                                        | To display the chips under each flower card                               |
 | **Helper Entities (number, datetime)**                                                                              | For storing thresholds and last fertilization times                       |
 
----
-
 ## 🪴 How Plant Status is Tracked
 
 Each plant has:
@@ -61,8 +52,6 @@ Each plant has:
 - Thresholds (warning + alert) based on the plant’s botanical family
 
 Now each component in more detail:
-
----
 
 ## 💧 Detecting Watering Automatically
 
@@ -109,8 +98,6 @@ These sensors return a **float value**, like `2.33`, which means 2 days and 8 ho
 
 > The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
 
----
-
 ## 🧪 Tracking Fertilization Manually
 
 I decided to track fertilization manually just to keep it simple. I really just want to know the last time I fertilized each plant, not a full history of fertilization. I do this with:
@@ -122,8 +109,6 @@ I decided to track fertilization manually just to keep it simple. I really just 
   - Mark the plant as fertilized with a one-click script
 
 These values are used in the dashboard and in daily alerts.
-
----
 
 ## 🌳 Grouping Plants by Botanical Family
 
@@ -142,8 +127,6 @@ This lets me:
 
 - Apply consistent thresholds to all plants in the same family
 - Adjust parameters based on care needs (e.g. Calatheas vs. Dracaenas)
-
----
 
 ## 🧱 Reusable Dashboard Card
 
@@ -166,8 +149,6 @@ You can find the full code [here](./lovelace/plant_card_compact.yaml), and I’v
 
 ![](https://holocron.so/uploads/fce3d6a3-1000000514.jpg.jpeg)
 
----
-
 ## 📢 Dashboard Summary Alerts
 
 The dashboard also includes a **summary section** showing alerts across all plants:
@@ -182,8 +163,6 @@ Code is in [lovelace/summary_cards.yaml](./lovelace/summary_cards.yaml)
 
 ![](https://holocron.so/uploads/68bc7daa-1000000505.jpg.jpeg)
 
----
-
 ## 📬 Morning Notification
 
 Every morning, I receive a **digest of care reminders**:
@@ -197,8 +176,6 @@ Every morning, I receive a **digest of care reminders**:
 > ⚠️ **Note:**\
 > This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
 
----
-
 ## ➕ Adding a New Plant
 
 1. Add plant in Plant Monitor.
@@ -208,17 +185,13 @@ Every morning, I receive a **digest of care reminders**:
 5. Create the SQL sensor to detect watering.
 6. Add the plant to the dashboard using the `decluttering-card` template.
 
----
-
 ## 📷 Screenshots
 
 Screenshots are available in the `/screenshots` folder.\
 You can also see a demo video in [my Reddit post](https://www.reddit.com/r/homeassistant/comments/I3M77Xn8W4/).
 
----
-
 ## 🤝 Feedback Welcome
 
 This project is based entirely on my own research and tinkering — it’s probably not perfect, and there might be better ways to do parts of it. I’d love to hear from others using similar setups or trying something new.
 
-Feel free to reuse, adapt, or improve anything here — and if you have ideas or improvements, let me know.
+Feel free to reuse, adapt, or improve anything here — and if you have ideas or improvements, please let me know!
