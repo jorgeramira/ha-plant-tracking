@@ -188,10 +188,8 @@ Every morning, I receive a **digest of care reminders**:
 - Plants recently fertilized but showing poor conductivity
 - Plants that might be overdue for watering
 
-&lt;Holocron.Callout type="note"&gt;
-⚠️ **Note:**\
-This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
-&lt;/Holocron.Callout&gt;
+> ⚠️ **Note:**\
+> This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
 
 ---
 
