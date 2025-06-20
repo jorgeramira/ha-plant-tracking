@@ -1,0 +1,244 @@
+# Home Assistant decluttering template for plant monitoring cards
+decluttering_templates:
+  plant_card_compact:
+    # Template description: Creates a reusable plant monitoring card
+    description: >-
+      Reusable card for a plant, parameterized by its internal name (e.g., maia, lima_limon)
+    # Template parameter - allows passing in different plant names
+    variables:
+      - plant
+    # Main card configuration
+    card:
+      # Vertical stack combines multiple cards in a column layout
+      type: vertical-stack
+      cards:
+        # First card: Custom flower card showing plant details and sensor bars
+        - type: custom:flower-card
+          entity: plant.[[plant]]  # Dynamic entity based on plant parameter
+          show_bars:
+            - moisture      # Display moisture level bar
+            - conductivity  # Display soil conductivity bar
+          display_type: full  # Show full plant information
+        
+        # Second card: Mushroom chips card with watering and fertilizing info
+        - type: custom:mushroom-chips-card
+          chips:
+            # First chip: Watering information and status
+            - type: template
+              entity: sensor.[[plant]]_last_watering  # Sensor tracking last watering time
+              icon: mdi:watering-can-outline
+              # Disable all tap interactions for this chip
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              # Content template: Calculate and display time since last watering
+              content: >
+                {% set days = states('sensor.' ~ '[[plant]]' ~ '_last_watering') %}
+                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) > 0.0 %}
+                  {% set days = days | float %}
+                  # Display days and hours since last watering (e.g., "3d 12h")
+                  {{ days | int }}d {{ ((days % 1) * 24) | round }}h
+                {% else %}
+                  # Show message when no watering data is available
+                  No watering detected yet
+                {% endif %}              
+              # Icon color based on watering schedule status
+              icon_color: >
+                {% set days = states('sensor.' ~ '[[plant]]' ~ '_last_watering') %}
+                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) > 0.0 %}
+                  {% set days = days | float %}
+                  # Get plant family/species for watering schedule thresholds
+                  {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
+                  # Get warning and alert thresholds from input_number entities
+                  {% set warn = states('input_number.' ~ family ~ '_watering_warning_days') | float %}
+                  {% set alert = states('input_number.' ~ family ~ '_watering_alert_days') | float %}
+                  # Color coding: red = overdue, orange = warning, green = ok
+                  {% if days >= alert %}
+                    red
+                  {% elif days >= warn %}
+                    orange
+                  {% else %}
+                    green
+                  {% endif %}
+                {% endif %} 
+              # Custom styling with card_mod
+              card_mod:
+                style: |
+                  ha-card {
+                    # Recalculate watering status for styling
+                    {% set days = states('sensor.' ~ '[[plant]]' ~ '_last_watering') %}
+                    {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) > 0.0 %}
+                      {% set days = days | float %}
+                      {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
+                      {% set warn = states('input_number.' ~ family ~ '_watering_warning_days') | float %}
+                      {% set alert = states('input_number.' ~ family ~ '_watering_alert_days') | float %}
+                      # Background color and border based on watering status
+                      {% if days >= alert %}
+                        # Red background/border for overdue watering
+                        background-color: rgba(255, 99, 99, 0.3) !important;
+                        border: 2px solid rgba(255, 99, 99, 0.6) !important;
+                      {% elif days >= warn %}
+                        # Yellow background/border for warning
+                        background-color: rgba(255, 235, 125, 0.3) !important;
+                        border: 2px solid rgba(255, 235, 125, 0.6) !important;
+                      {% else %}
+                        # Green background/border for good status
+                        background-color: rgba(144, 238, 144, 0.3) !important;
+                        border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                      {% endif %}
+                      # Calculate exact last watering date for tooltip
+                      {% set last_dt = now() - timedelta(days=days) %}
+                      --tooltip-content: "Last watered: {{ last_dt.strftime('%A, %d %B %Y at %H:%M') }}";
+                    {% else %}
+                      # Gray styling for unknown status
+                      background-color: rgba(158, 158, 158, 0.2) !important;
+                      border: 1px solid rgba(158, 158, 158, 0.5) !important;
+                      --tooltip-content: "No watering detected yet";
+                    {% endif %}
+                  }
+                  # Tooltip bubble that appears on hover
+                  ha-card:hover::after {
+                    content: var(--tooltip-content);
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    white-space: nowrap;
+                    z-index: 1000;
+                    bottom: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    margin-bottom: 5px;
+                  }
+                  # Tooltip arrow pointing down
+                  ha-card:hover::before {
+                    content: "";
+                    position: absolute;
+                    border: 5px solid transparent;
+                    border-top-color: rgba(0, 0, 0, 0.8);
+                    bottom: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1000;
+                  }
+            
+            # Second chip: Fertilizing information and controls
+            - type: template
+              entity: input_datetime.[[plant]]_last_fertilizing  # Input datetime for fertilizing tracking
+              icon: mdi:cup-water
+              # Tap to open more info dialog
+              tap_action:
+                action: more-info
+                entity: input_datetime.[[plant]]_last_fertilizing
+              # Hold to run fertilize script with confirmation
+              hold_action:
+                action: call-service
+                service: script.fertilize_plant_now
+                service_data:
+                  plant: '[[plant]]'
+                confirmation:
+                  text: Mark this lady as fertilized now?
+              double_tap_action:
+                action: none
+              # Content template: Calculate and display time since last fertilizing
+              content: >
+                {% set dt = states('input_datetime.' ~ '[[plant]]' ~ '_last_fertilizing') %}
+                {% if dt not in ['unknown', 'unavailable'] and as_local(as_datetime(dt)) < now() %}
+                  # Convert datetime string to local datetime object
+                  {% set fertilized = as_local(as_datetime(dt)) %}
+                  {% set delta = now() - fertilized %}
+                  {% set days = delta.total_seconds() / 86400 %}
+                  # Display days and hours since last fertilizing
+                  {{ days|int }}d {{ ((days % 1) * 24)|round }}h
+                {% else %}
+                  # Show message when no fertilizing data is available
+                  No fertilization recorded
+                {% endif %}
+              # Icon color based on fertilizing schedule status
+              icon_color: >
+                {% set dt = states('input_datetime.' ~ '[[plant]]' ~ '_last_fertilizing') %}
+                {% if dt not in ['unknown', 'unavailable'] and as_local(as_datetime(dt)) < now() %}
+                  {% set fertilized = as_local(as_datetime(dt)) %}
+                  {% set delta = now() - fertilized %}
+                  {% set days = delta.days %}
+                  # Get plant family for fertilizing schedule thresholds
+                  {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
+                  {% set warn = states('input_number.' ~ family ~ '_fertilizing_warning_days') | float %}
+                  {% set alert = states('input_number.' ~ family ~ '_fertilizing_alert_days') | float %}
+                  # Color coding: red = overdue, orange = warning, green = ok
+                  {% if days >= alert %}
+                    red
+                  {% elif days >= warn %}
+                    orange
+                  {% else %}
+                    green
+                  {% endif %}
+                {% endif %}
+              # Custom styling with card_mod (similar structure to watering chip)
+              card_mod:
+                style: |
+                  ha-card {
+                    # Recalculate fertilizing status for styling
+                    {% set dt = states('input_datetime.' ~ '[[plant]]' ~ '_last_fertilizing') %}
+                    {% if dt not in ['unknown', 'unavailable'] and as_local(as_datetime(dt)) < now() %}
+                      {% set fertilized = as_local(as_datetime(dt)) %}
+                      {% set delta = now() - fertilized %}
+                      {% set days = delta.days %}
+                      {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
+                      {% set warn = states('input_number.' ~ family ~ '_fertilizing_warning_days') | float %}
+                      {% set alert = states('input_number.' ~ family ~ '_fertilizing_alert_days') | float %}
+                      # Background color and border based on fertilizing status
+                      {% if days >= alert %}
+                        # Red background/border for overdue fertilizing
+                        background-color: rgba(255, 99, 99, 0.3) !important;
+                        border: 2px solid rgba(255, 99, 99, 0.6) !important;
+                      {% elif days >= warn %}
+                        # Yellow background/border for warning
+                        background-color: rgba(255, 235, 125, 0.3) !important;
+                        border: 2px solid rgba(255, 235, 125, 0.6) !important;
+                      {% else %}
+                        # Green background/border for good status
+                        background-color: rgba(144, 238, 144, 0.3) !important;
+                        border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                      {% endif %}
+                      # Set tooltip content with exact fertilizing date
+                      --tooltip-content: "Last fertilized: {{ fertilized.strftime('%A, %d %B %Y at %H:%M') }}";
+                    {% else %}
+                      # Gray styling for unknown status
+                      background-color: rgba(158, 158, 158, 0.2) !important;
+                      border: 1px solid rgba(158, 158, 158, 0.5) !important;
+                      --tooltip-content: "No fertilization date recorded";
+                    {% endif %}
+                  }
+                  # Tooltip bubble that appears on hover (same as watering chip)
+                  ha-card:hover::after {
+                    content: var(--tooltip-content);
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    white-space: nowrap;
+                    z-index: 1000;
+                    bottom: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    margin-bottom: 5px;
+                  }
+                  # Tooltip arrow pointing down (same as watering chip)
+                  ha-card:hover::before {
+                    content: "";
+                    position: absolute;
+                    border: 5px solid transparent;
+                    border-top-color: rgba(0, 0, 0, 0.8);
+                    bottom: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1000;
+                  }
