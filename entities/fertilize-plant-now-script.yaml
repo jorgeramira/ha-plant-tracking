@@ -1,0 +1,15 @@
+alias: Fertilize plant now
+description: ""
+fields:
+  plant:
+    selector:
+      text: null
+    name: plant
+    description: The name of the plant to mark as fertilized now
+    required: true
+sequence:
+  - action: input_datetime.set_datetime
+    metadata: {}
+    data:
+      entity_id: input_datetime.{{ plant }}_last_fertilizing
+      datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
