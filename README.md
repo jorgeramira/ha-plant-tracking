@@ -99,8 +99,6 @@ These sensors return a **float value**, like `2.33`, which means 2 days and 8 ho
 
 > The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
 
----
-
 ## 🧪 Tracking Fertilization Manually
 
 I decided to track fertilization manually just to keep it simple. I really just want to know the last time I fertilized each plant, not a full history of fertilization. I do this with:
@@ -148,7 +146,7 @@ I use [decluttering-card](https://github.com/custom-cards/decluttering-card) to 
   - Hold: mark plant as fertilized via script
   - Color-coded like watering chip
 
-You can find the full code [here](./lovelace/plant_card_compact.yaml), and I’ve added comments inline for clarity.
+You can find the full code [here](./dashboard/plants/decluttering-card template.yaml), and I’ve added comments inline for clarity.
 
 ## 📢 Dashboard Summary Alerts
 
