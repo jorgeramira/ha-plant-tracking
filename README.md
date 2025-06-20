@@ -146,7 +146,7 @@ I use [decluttering-card](https://github.com/custom-cards/decluttering-card) to 
   - Hold: mark plant as fertilized via script
   - Color-coded like watering chip
 
-You can find the full code [here](./dashboard/plants/decluttering-card template.yaml), and I’ve added comments inline for clarity.
+You can find the full code [here](./dashboard/plants/decluttering-card-template.yaml), and I’ve added comments inline for clarity.
 
 ## 📢 Dashboard Summary Alerts
 
@@ -158,7 +158,7 @@ The dashboard also includes a **summary section** showing alerts across all plan
 - **Watering Alert** (critical days passed without watering)
 
 These use `auto-entities` and Jinja filters to show only relevant plants.\
-Code is in [lovelace/summary_cards.yaml](./lovelace/summary_cards.yaml)
+Code is [here](./dashboard/summary)
 
 ## 📬 Morning Notification
 
