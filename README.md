@@ -107,9 +107,7 @@ FROM (
 Each plant gets its own version of this query.\
 These sensors return a **float value**, like `2.33`, which means 2 days and 8 hours ago.
 
-<Holocron.Callout type="note">
-    The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
-</Holocron.Callout>
+> The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
 
 ---
 
@@ -190,10 +188,10 @@ Every morning, I receive a **digest of care reminders**:
 - Plants recently fertilized but showing poor conductivity
 - Plants that might be overdue for watering
 
-<Holocron.Callout type="note">
-    ⚠️ **Note:**\
-    This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
-</Holocron.Callout>
+&lt;Holocron.Callout type="note"&gt;
+⚠️ **Note:**\
+This logic is currently hardcoded per plant family. I’m working on updating it to pull the same thresholds used in the dashboard from helper entities, and will update the repo when that’s ready.
+&lt;/Holocron.Callout&gt;
 
 ---
 
