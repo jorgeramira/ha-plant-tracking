@@ -3,7 +3,8 @@ decluttering_templates:
   plant_card_compact:
     # Template description: Creates a reusable plant monitoring card
     description: >-
-      Reusable card for a plant, parameterized by its internal name (e.g., maia, lima_limon)
+      Reusable card for a plant, parameterized by its internal name (e.g., maia,
+      lima_limon)
     # Template parameter - allows passing in different plant names
     variables:
       - plant
@@ -37,32 +38,66 @@ decluttering_templates:
               # Content template: Calculate and display time since last watering
               content: >
                 {% set days = states('sensor.' ~ '[[plant]]' ~ '_last_watering') %}
-                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) > 0.0 %}
+                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) >= 0.0 %}
                   {% set days = days | float %}
                   # Display days and hours since last watering (e.g., "3d 12h")
                   {{ days | int }}d {{ ((days % 1) * 24) | round }}h
                 {% else %}
                   # Show message when no watering data is available
-                  No watering detected yet
+                  No waterings yet
                 {% endif %}              
               # Icon color based on watering schedule status
+              # NEW: Enhanced logic with average-based coloring and self-watering detection
               icon_color: >
                 {% set days = states('sensor.' ~ '[[plant]]' ~ '_last_watering') %}
-                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) > 0.0 %}
+                {% set avg_days = states('sensor.' ~ '[[plant]]' ~ '_days_between_waterings') %}
+                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(0) > 0 %}
                   {% set days = days | float %}
-                  # Get plant family/species for watering schedule thresholds
-                  {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
-                  # Get warning and alert thresholds from input_number entities
-                  {% set warn = states('input_number.' ~ family ~ '_watering_warning_days') | float %}
-                  {% set alert = states('input_number.' ~ family ~ '_watering_alert_days') | float %}
-                  # Color coding: red = overdue, orange = warning, green = ok
-                  {% if days >= alert %}
-                    red
-                  {% elif days >= warn %}
-                    orange
+                  # NEW: Check if average days sensor has valid data
+                  {% if avg_days not in ['unknown', 'unavailable', 'none'] and avg_days | float(0) > 0 %}
+                    {% set avg_days = avg_days | float %}
+                    # NEW: Calculate percentage over average for color thresholds
+                    {% set days_over_avg_pct = days / avg_days %}
+                    # NEW: Check if plant uses self-watering (repurposing max_dli field)
+                    # When max_dli = 100.0, we mark the plant as self-watering
+                    # (Users not tracking DLI can repurpose this field for self-watering flag)
+                    {% set selfwater = states('number.' ~ '[[plant]]' ~ '_max_dli') | float %}
+                    {% if selfwater == 100.0 %}
+                      # NEW: Cyan color indicates self-watering system
+                      cyan
+                    {% elif days_over_avg_pct >= 1.20 %}
+                      # NEW: Red when 20% or more over average watering schedule
+                      red
+                    {% elif days_over_avg_pct >= 1 %}
+                      # NEW: Orange when at or slightly over average
+                      orange
+                    {% else %}
+                      # NEW: Green when below average (watered recently)
+                      green
+                    {% endif %}
                   {% else %}
-                    green
+                    # Fallback: Use species-based thresholds when no average data available
+                    {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
+                    {% if family %}
+                      {% set warn = states('input_number.' ~ family ~ '_watering_warning_days') | float(0) %}
+                      {% set alert = states('input_number.' ~ family ~ '_watering_alert_days') | float(0) %}
+                      {% if warn > 0 and alert > 0 %}
+                        {% if days >= alert %}
+                          red
+                        {% elif days >= warn %}
+                          orange
+                        {% else %}
+                          green
+                        {% endif %}
+                      {% else %}
+                        green
+                      {% endif %}
+                    {% else %}
+                      green
+                    {% endif %}
                   {% endif %}
+                {% else %}
+                  green
                 {% endif %} 
               # Custom styling with card_mod
               card_mod:
@@ -70,33 +105,97 @@ decluttering_templates:
                   ha-card {
                     # Recalculate watering status for styling
                     {% set days = states('sensor.' ~ '[[plant]]' ~ '_last_watering') %}
-                    {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) > 0.0 %}
+                    # NEW: Get average days between waterings from SQL sensor
+                    {% set avg_days = states('sensor.' ~ '[[plant]]' ~ '_days_between_waterings') %}
+                    {% if days not in ['unknown', 'unavailable', 'none'] and days | float(0) > 0 %}
                       {% set days = days | float %}
-                      {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
-                      {% set warn = states('input_number.' ~ family ~ '_watering_warning_days') | float %}
-                      {% set alert = states('input_number.' ~ family ~ '_watering_alert_days') | float %}
-                      # Background color and border based on watering status
-                      {% if days >= alert %}
-                        # Red background/border for overdue watering
-                        background-color: rgba(255, 99, 99, 0.3) !important;
-                        border: 2px solid rgba(255, 99, 99, 0.6) !important;
-                      {% elif days >= warn %}
-                        # Yellow background/border for warning
-                        background-color: rgba(255, 235, 125, 0.3) !important;
-                        border: 2px solid rgba(255, 235, 125, 0.6) !important;
+                      # NEW: Primary path - use average-based calculations when available
+                      {% if avg_days not in ['unknown', 'unavailable', 'none'] and avg_days | float(0) > 0 %}
+                        {% set avg_days = avg_days | float %}
+                        # NEW: Calculate percentage and absolute difference from average
+                        {% set days_over_avg_pct = days / avg_days %}
+                        {% set days_over_avg = days - avg_days %}
+                        # NEW: Check self-watering status (max_dli = 100.0 = self-watering)
+                        {% set selfwater = states('number.' ~ '[[plant]]' ~ '_max_dli') | float %}
+                        # Calculate exact last watering datetime for tooltip
+                        {% set last_dt = now() - timedelta(days=days) %}
+                        # NEW: Build dynamic text showing days over/under average
+                        {% if days_over_avg >= 0 %}
+                          {% set days_over_avg_text = " (+" ~ (days_over_avg|round(1)) ~ " days over average)" %}
+                        {% else %}
+                          {% set days_over_avg_text = " (" ~ (days_over_avg|round(1)) ~ " days below average)" %}
+                        {% endif %}
+                        # NEW: Style and tooltip for self-watering plants
+                        {% if selfwater == 100.0 %}
+                          {% set days_over_avg_text = "" %}
+                          # NEW: Cyan background/border for self-watering systems
+                          background-color: rgba(99, 255, 255, 0.3) !important;
+                          border: 2px solid rgba(99, 255, 255, 0.6) !important;
+                        # NEW: Style for plants 20%+ over average (needs water urgently)
+                        {% elif days_over_avg_pct >= 1.20 %}
+                          background-color: rgba(255, 99, 99, 0.3) !important;
+                          border: 2px solid rgba(255, 99, 99, 0.6) !important;
+                        # NEW: Style for plants at/slightly over average (warning)
+                        {% elif days_over_avg_pct >= 1 %}
+                          background-color: rgba(255, 235, 125, 0.3) !important;
+                          border: 2px solid rgba(255, 235, 125, 0.6) !important;
+                        # NEW: Style for plants below average (recently watered)
+                        {% else %}
+                          background-color: rgba(144, 238, 144, 0.3) !important;
+                          border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                        {% endif %}
+                        # NEW: Text color matches urgency level
+                        {% if days_over_avg_pct >= 1.20 %}
+                          color: #d32f2f !important;
+                        {% elif days_over_avg_pct >= 1 %}
+                          color: #f57c00 !important;
+                        {% else %}
+                          color: #388e3c !important;
+                        {% endif %}
+                        # NEW: Tooltip shows last watering date + comparison to average
+                        --tooltip-content: "Last watered: {{ last_dt.strftime('%A, %d %B %Y at %H:%M') }}{{ days_over_avg_text }}";
                       {% else %}
-                        # Green background/border for good status
-                        background-color: rgba(144, 238, 144, 0.3) !important;
-                        border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                        # Fallback: Use species-based thresholds when no average data
+                        {% set family = state_attr('plant.' ~ '[[plant]]', 'species_original') %}
+                        {% if family %}
+                          {% set warn = states('input_number.' ~ family ~ '_watering_warning_days') | float(0) %}
+                          {% set alert = states('input_number.' ~ family ~ '_watering_alert_days') | float(0) %}
+                          {% if warn > 0 and alert > 0 %}
+                            {% if days >= alert %}
+                              background-color: rgba(255, 99, 99, 0.3) !important;
+                              border: 2px solid rgba(255, 99, 99, 0.6) !important;
+                              color: #ff6363 !important;
+                            {% elif days >= warn %}
+                              background-color: rgba(255, 235, 125, 0.3) !important;
+                              border: 2px solid rgba(255, 235, 125, 0.6) !important;
+                              color: #ffeb7d !important;
+                            {% else %}
+                              background-color: rgba(144, 238, 144, 0.3) !important;
+                              border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                              color: #90ee90 !important;
+                            {% endif %}
+                            {% set last_dt = now() - timedelta(days=days) %}
+                            --tooltip-content: "Last watered: {{ last_dt.strftime('%A, %d %B %Y at %H:%M') }} (using species defaults)";
+                          {% else %}
+                            background-color: rgba(144, 238, 144, 0.3) !important;
+                            border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                            color: #90ee90 !important;
+                            {% set last_dt = now() - timedelta(days=days) %}
+                            --tooltip-content: "Last watered: {{ last_dt.strftime('%A, %d %B %Y at %H:%M') }} (no thresholds configured)";
+                          {% endif %}
+                        {% else %}
+                          background-color: rgba(144, 238, 144, 0.3) !important;
+                          border: 2px solid rgba(144, 238, 144, 0.6) !important;
+                          color: #90ee90 !important;
+                          {% set last_dt = now() - timedelta(days=days) %}
+                          --tooltip-content: "Last watered: {{ last_dt.strftime('%A, %d %B %Y at %H:%M') }} (no species configured)";
+                        {% endif %}
                       {% endif %}
-                      # Calculate exact last watering date for tooltip
-                      {% set last_dt = now() - timedelta(days=days) %}
-                      --tooltip-content: "Last watered: {{ last_dt.strftime('%A, %d %B %Y at %H:%M') }}";
                     {% else %}
                       # Gray styling for unknown status
                       background-color: rgba(158, 158, 158, 0.2) !important;
                       border: 1px solid rgba(158, 158, 158, 0.5) !important;
-                      --tooltip-content: "No watering detected yet";
+                      --tooltip-content: "No waterings yet";
                     {% endif %}
                   }
                   # Tooltip bubble that appears on hover
@@ -126,8 +225,30 @@ decluttering_templates:
                     transform: translateX(-50%);
                     z-index: 1000;
                   }
-            
-            # Second chip: Fertilizing information and controls
+            # Second chip: Average days between waterings (informational display)
+            # NEW: This chip displays the calculated average from SQL sensor
+            - type: template
+              entity: sensor.[[plant]]_days_between_waterings  # SQL sensor with historical average
+              icon: mdi:chart-bell-curve
+              # Disable all tap interactions for this chip
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+              double_tap_action:
+                action: none
+              # Content template: Display average watering interval
+              content: >
+                {% set days = states('sensor.' ~ '[[plant]]' ~ '_days_between_waterings') %}
+                {% if days not in ['unknown', 'unavailable', 'none'] and days | float(9999) >= 0.0 %}
+                  {% set days = days | float %}
+                  # Display average days and hours between waterings
+                  {{ days | int }}d {{ ((days % 1) * 24) | round }}h
+                {% else %}
+                  # Show dash when no average data available
+                  -
+                {% endif %} 
+            # Third chip: Fertilizing information and controls
             - type: template
               entity: input_datetime.[[plant]]_last_fertilizing  # Input datetime for fertilizing tracking
               icon: mdi:cup-water
