@@ -1,0 +1,46 @@
+{%- set ns = namespace(plants=[]) -%}
+{%- for s in states.sensor if s.entity_id.endswith('_last_watering') -%}
+  {%- set plant_id = s.entity_id.replace('sensor.', '').replace('_last_watering','') -%}
+  {%- set days = s.state | float(0) -%}
+  {%- set min_moisture = states('number.' ~ plant_id ~ '_min_soil_moisture') | float(0) -%}
+  {%- set moisture = states('sensor.' ~ plant_id ~ '_soil_moisture') | float(9999) -%}
+  {%- set plant_entity = states['plant.' ~ plant_id] -%}
+  {%- set avg_days = states('sensor.' ~ plant_id ~ '_days_between_waterings') -%}
+  {%- set show_plant = false -%}
+  {%- set reason = '' -%}
+  {%- if plant_entity and plant_entity != 'unknown' -%}
+    {%- if avg_days not in ['unknown', 'unavailable', 'none'] and avg_days | float(0) > 0 -%}
+      {# Use personalized average-based thresholds #}
+      {%- set avg_days_val = avg_days | float(0) -%}
+      {%- set days_over_avg_pct = days / avg_days_val -%}
+      {%- if days_over_avg_pct >= 1 and days_over_avg_pct < 1.25 -%}
+        {%- set show_plant = true -%}
+        {%- set avg_days_part = avg_days_val | int -%}
+        {%- set avg_hours_part = ((avg_days_val - avg_days_part) * 24) | round(0) -%}
+        {%- set avg_time_format = avg_days_part | string ~ 'd' ~ (' ' ~ avg_hours_part | string ~ 'h' if avg_hours_part > 0 else '') -%}
+        {%- set reason = 'Average: ' ~ avg_time_format ~ ' (+' ~ ((days_over_avg_pct - 1) * 100) | round(0) ~ '%)' -%}
+      {%- endif -%}
+    {%- else -%}
+      {# Fallback to species defaults #}
+      {%- set family = plant_entity.attributes.species_original -%}
+      {%- if family -%}
+        {%- set warning_threshold = states('input_number.' ~ family | lower ~ '_watering_warning_days') | float(9999) -%}
+        {%- set alert_threshold = states('input_number.' ~ family | lower ~ '_watering_alert_days') | float(9999) -%}
+        {%- if days and days >= warning_threshold and days < alert_threshold -%}
+          {%- set show_plant = true -%}
+          {%- set reason = 'Species: ' ~ warning_threshold | round(0) ~ '-' ~ alert_threshold | round(0) ~ ' días' -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if show_plant -%}
+    {%- set plant_name = device_attr('sensor.' ~ plant_id ~ '_last_watering', 'name') -%}
+    {%- set days_part = days | int -%}
+    {%- set hours_part = ((days - days_part) * 24) | round(0) -%}
+    {%- set time_format = days_part | string ~ 'd' ~ (' ' ~ hours_part | string ~ 'h' if hours_part > 0 else '') -%}
+    {%- set ns.plants = ns.plants + [{'name': plant_name, 'days': days, 'time_format': time_format, 'moisture': moisture, 'reason': reason}] -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for plant in ns.plants | sort(attribute='days', reverse=true) -%}
+- **{{ plant.name }}**: {{ plant.time_format }} {{ plant.reason }}
+{% endfor %}

@@ -1,0 +1,29 @@
+{%- set ns = namespace(plants=[]) -%}
+{%- set ns2 = namespace(plants=[]) -%}
+{%- for s in states.sensor if s.entity_id.endswith('_soil_moisture') -%}
+  {%- set plant_id = s.entity_id.replace('sensor.', '').replace('_soil_moisture','') -%}
+  {%- set min_val = states('number.' ~ plant_id ~ '_min_soil_moisture') | float(0) -%}
+  {%- set current_val = s.state | float(9999) -%}
+  {%- if current_val > min_val and current_val <= min_val + 2 -%}
+    {%- set diff = current_val - min_val -%}
+    {%- set plant_name = device_attr(s.entity_id, 'name') -%}
+    {%- set ns2.plants = ns2.plants + [{'name': plant_name, 'moisture': current_val, 'diff': diff}] -%}
+  {%- elif current_val <= min_val -%}
+    {%- set diff = current_val - min_val -%}
+    {%- set plant_name = device_attr(s.entity_id, 'name') -%}
+    {%- set ns.plants = ns.plants + [{'name': plant_name, 'moisture': current_val, 'diff': diff}] -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if ns.plants | length > 0 %}
+### Below minimum
+{%- for plant in ns.plants | sort(attribute='diff') %}
+- **{{ plant.name }}**: {{ plant.moisture | round(0) }}% ({{ plant.diff | round(0) }}%)
+{%- endfor %}
+{%- endif -%}
+{%- if ns2.plants | length > 0 %}
+
+### Upcoming (within 2%)
+{%- for plant in ns2.plants | sort(attribute='diff') %}
+- **{{ plant.name }}**: {{ plant.moisture | round(0) }}% (+{{ plant.diff | round(0) }}%)
+{%- endfor %}
+{%- endif -%}

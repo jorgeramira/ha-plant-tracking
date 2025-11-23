@@ -1,0 +1,30 @@
+{%- set ns = namespace(plants=[]) -%}
+{%- for s in states.sensor if s.entity_id.endswith('_conductivity') -%}
+  {%- set plant_id = s.entity_id.replace('sensor.', '').replace('_conductivity','') -%}
+  {%- set min_val = states('number.' ~ plant_id ~ '_min_conductivity') | float(0) -%}
+  {%- set current_val = s.state | float(9999) -%}
+  {%- set moisture = states('sensor.' ~ plant_id ~ '_soil_moisture') | float(0) -%}
+  {%- set fert_dt = states('input_datetime.' ~ plant_id ~ '_last_fertilizing') -%}
+  {%- set watering_days = states('sensor.' ~ plant_id ~ '_last_watering') | float(9999) -%}
+  {%- set show_plant = false -%}
+  {%- set reason = '' -%}
+  {%- if fert_dt not in ['unknown', 'unavailable'] and watering_days < 2 -%}
+    {%- set fertilized = as_local(as_datetime(fert_dt)) -%}
+    {%- set days_since = (now() - fertilized).days -%}
+    {%- if current_val < min_val and moisture > 40 -%}
+      {%- set show_plant = true -%}
+      {%- set reason = '' -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if current_val <= 100 -%}
+    {%- set show_plant = true -%}
+    {%- set reason = '' -%}
+  {%- endif -%}
+  {%- if show_plant -%}
+    {%- set plant_name = device_attr(s.entity_id, 'name') -%}
+    {%- set ns.plants = ns.plants + [{'name': plant_name, 'conductivity': current_val, 'moisture': moisture, 'reason': reason}] -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for plant in ns.plants | sort(attribute='conductivity') -%}
+  - **{{ plant.name }}**: {{ plant.conductivity | round(0) }} μS/cm ({{ plant.moisture | round(0) }}% soil moisture)
+{% endfor %}
