@@ -28,9 +28,9 @@ FROM (
         LAG(st.mean) OVER (ORDER BY st.created_ts) as prev_mean
       FROM statistics st
       JOIN statistics_meta sm ON sm.id = st.metadata_id
-      WHERE sm.statistic_id = 'sensor.alba_soil_moisture'  -- CHANGE THIS: Your sensor name
-        AND st.created_ts >= strftime('%s', '2024-01-01')    -- CHANGE THIS: Start date  
-        AND st.created_ts <= strftime('%s', '2099-08-15')    -- CHANGE THIS: End date (before self-watering)
+      WHERE sm.statistic_id = 'sensor.{plant}_soil_moisture'  -- CHANGE THIS: Your sensor name
+        AND st.created_ts >= strftime('%s', 'yyyy-mm-dd')    -- CHANGE THIS: Start date  
+        AND st.created_ts <= strftime('%s', 'yyyy-mm-dd')    -- CHANGE THIS: End date (before self-watering)
         AND st.mean IS NOT NULL
       ORDER BY st.created_ts
     ) moisture_data
@@ -39,4 +39,5 @@ FROM (
   WHERE day_rank = 1  -- Last watering per day
 ) intervals
 WHERE interval_days IS NOT NULL 
+
   AND interval_days >= 2;  -- CHANGE THIS: Minimum days between waterings
