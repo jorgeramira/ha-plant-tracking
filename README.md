@@ -148,7 +148,7 @@ FROM (
 WHERE interval_days IS NOT NULL 
   AND interval_days >= 2;  -- CHANGE THIS: Minimum days between waterings
 ```
-> Note**: you can limit the start and end range of the period over which to calculate the average by changing the WHERE statement. I added this to the code because I move a few of my plants to a self-watering system, and the averages would be skewed due to this. So, I can limit the average calculation to the date before I started using the self-watering system.
+> Note: you can limit the start and end range of the period over which to calculate the average by changing the WHERE statement. I added this to the code because I move a few of my plants to a self-watering system, and the averages would be skewed due to this. So, I can limit the average calculation to the date before I started using the self-watering system.
 
 
 > The SQL Integration has a bug when you return a date/datetime, and the resulting sensor can only be used as a string and not as an actual datetime. Because I was planning to use this sensor to track when each plant was last watered, I'm returning a number which represents the number of days that have passed instead of the date. I will calculate the actual date in the dashboard. They are still working on a fix for this.
