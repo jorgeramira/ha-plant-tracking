@@ -201,7 +201,7 @@ I use [decluttering-card](https://github.com/custom-cards/decluttering-card) to 
   - Hold: mark plant as fertilized via script
   - Color-coded like watering chip
 
-You can find the full code [here](./dashboard/decluttering-card-template.yaml), and I’ve added comments inline for clarity.
+You can find the full code [here](./dashboard/plants/decluttering-card-template.yaml), and I’ve added comments inline for clarity.
 
 ![](https://holocron.so/uploads/fce3d6a3-1000000514.jpg.jpeg)
 
@@ -209,13 +209,12 @@ You can find the full code [here](./dashboard/decluttering-card-template.yaml), 
 
 The dashboard also includes a **summary section** showing alerts across all plants:
 
-- **Low Soil Moisture**
-- **Low Nutrients** (recently fertilized, moist soil, but poor conductivity)
-- **Watering Warning** (days since watering exceed family threshold)
-- **Watering Alert** (critical days passed without watering)
+- **Time to Water**
+- **Low fertility** (recently fertilized, moist soil, but poor conductivity)
+- **Above watering average** (days since watering exceed the average for that particular plant by less than 25%)
+- **Long overdue** (days since watering exceed the average for that particular plant by more than 25%)
 
-These use `auto-entities` and Jinja filters to show only relevant plants.\
-Code is in [lovelace/summary_cards.yaml](./lovelace/summary_cards.yaml)
+Code is in [dashboard/summary](./dashboard/summary) folder.
 
 ![](https://holocron.so/uploads/68bc7daa-1000000505.jpg.jpeg)
 
