@@ -201,7 +201,7 @@ I use [decluttering-card](https://github.com/custom-cards/decluttering-card) to 
   - Hold: mark plant as fertilized via script
   - Color-coded like watering chip
 
-You can find the full code [here](./lovelace/plant_card_compact.yaml), and I’ve added comments inline for clarity.
+You can find the full code [here](./dashboard/decluttering-card-template.yaml), and I’ve added comments inline for clarity.
 
 ![](https://holocron.so/uploads/fce3d6a3-1000000514.jpg.jpeg)
 
